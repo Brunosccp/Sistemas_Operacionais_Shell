@@ -1,8 +1,9 @@
 #include "shell.h"
 
 int main (int argc, char** argv){
-    lsh_loop();
+    shell_loop();
 
 
     return EXIT_SUCCESS;
 }
+
