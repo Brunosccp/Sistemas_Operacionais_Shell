@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #define SHELL_RL_BUFFSIZE 1024
 
+#define LSH_TOK_BUFSIZE 64
+#define LSH_TOK_DELIM " \t\r\n\a"
 
 void shell_loop(){
     char *line;
@@ -20,8 +22,9 @@ void shell_loop(){
 }
 char* shell_read_line(){
     int position = 0;
+    int bufferSize = SHELL_RL_BUFFSIZE;
 
-    char* buffer = malloc (sizeof(char) * SHELL_RL_BUFFSIZE);
+    char* buffer = malloc (sizeof(char) * bufferSize);
 
     int c;
 
@@ -33,7 +36,21 @@ char* shell_read_line(){
         }else{
             buffer[position] = c;
         }
-        
+        position++;
+
+        if(position >= SHELL_RL_BUFFSIZE){
+            bufferSize += SHELL_RL_BUFFSIZE;
+
+            buffer = realloc(buffer, bufferSize);
+
+            //allocation error
+            if(!buffer){
+                fprintf(stderr, "shell: reallocation error")
+                exit(EXIT_FAILURE);
+            }
+            
+        }
+
     }
 
 }
