@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
 
 #define SHELL_RL_BUFFSIZE 1024
 
@@ -10,6 +13,7 @@
 void shell_loop();
 char* shell_read_line();
 char** shell_split_line();
+int shell_launch();
 
 void shell_loop(){
     char *line;
@@ -93,7 +97,29 @@ char** shell_split_line(char* line){
 
         token = strtok(NULL, LSH_TOK_DELIM);
     }
-    
+
     tokens[position] = NULL;
     return tokens;
 }
+int shell_launch(char **args){
+    pid_t pid, wpid;
+
+    int status;
+
+    pid = fork();
+    if(pid == 0){
+        if(execvp(args[0], args) == -1){
+            perror("lsh");
+        }
+        exit(EXIT_FAILURE);
+    }else if(pid < 0){
+        //error forking
+        perror("lsh");
+    }else{
+        do{
+            wpid = waitpid(pid, &status, WUNTRACED);
+        }while(!WIFEXITED(status) && !WIFSIGNALED(status));
+    }
+    return 1;
+}
+
